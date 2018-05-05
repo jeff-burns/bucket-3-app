@@ -54,13 +54,12 @@ class RouteTimesForm extends Component {
   };
 
   handleTimes = event => {
-    debugger;
     event.preventDefault();
 
-    const startIndex = event.target.convertTime1.selectedIndex;
+    const startIndex = event.target["start-time"].selectedIndex;
     const getStartIndexForHour = timeIndices[startIndex];
 
-    const endIndex = event.target.convertTime2.selectedIndex;
+    const endIndex = event.target["end-time"].selectedIndex;
     const getEndIndexForHour = timeIndices[endIndex];
 
     this.setState({
