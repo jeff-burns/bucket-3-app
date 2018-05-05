@@ -60,10 +60,9 @@ class RouteTimesForm extends Component {
   };
 
   updateWeatherData({ inputValues, startTimeIndex, endTimeIndex }) {
-    const startData = this.getStartData({ inputValues, startTimeIndex });
-    const endData = this.getEndData({ inputValues, endTimeIndex });
-    //const weatherData = {startData,endData};
-    //this.setState({weatherData});
+    const startWeather = this.getStartData({ inputValues, startTimeIndex });
+    const endWeather = this.getEndData({ inputValues, endTimeIndex });
+    this.setState({ startWeather, endWeather });
   }
 
   getStartData({ inputValues, startTimeIndex }) {
@@ -76,15 +75,13 @@ class RouteTimesForm extends Component {
         return response.json();
       })
       .then(resp => {
-        debugger;
         const weather = resp.hourly_forecast[startTimeIndex];
         const sun = weather.condition;
         const precipitation = weather.qpf.english;
         const temp = weather.temp.english;
         const windChill = weather.feelslike.english;
-        this.setState({
-          startWeather: { sun, precipitation, temp, windChill }
-        });
+        const propsWeather = { sun, precipitation, temp, windChill };
+        return propsWeather;
       })
       .catch(error => {
         console.log(error);
@@ -101,15 +98,13 @@ class RouteTimesForm extends Component {
         return response.json();
       })
       .then(resp => {
-        debugger;
         const weather = resp.hourly_forecast[endTimeIndex];
         const sun = weather.condition;
         const precipitation = weather.qpf.english;
         const temp = weather.temp.english;
         const windChill = weather.feelslike.english;
-        this.setState({
-          endWeather: { sun, precipitation, temp, windChill }
-        });
+        const propsWeather = { sun, precipitation, temp, windChill };
+        return propsWeather;
       })
       .catch(error => {
         console.log(error);
