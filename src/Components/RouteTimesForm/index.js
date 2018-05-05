@@ -22,36 +22,27 @@ class RouteTimesForm extends Component {
     this.state = {
       data: [...inputNames],
       startTime: 0,
-      endTime: 0
+      endTime: 0,
+      startWeather: [],
+      endWeather: []
     };
-
-    this.getRouteStartData = this.getRouteStartData.bind(this);
-    this.getRouteEndData = this.getRouteEndData.bind(this);
   }
 
-  onSubmit = event => {
+  onSubmit(event) {
     event.preventDefault();
-    this.handlePlaces(event);
-    this.handleTimes(event);
-  };
+    const inputValues = this.handlePlaces(event);
+    const { startTimeIndex, endTimeIndex } = this.handleTimes(event);
+    this.updateWeatherData({ inputValues, startTimeIndex, endTimeIndex });
+  }
 
-  handlePlaces = event => {
+  handlePlaces(event) {
     event.preventDefault();
-
     let returnObj = {};
-
     inputNames.forEach(name => {
       returnObj[name] = event.target[name].value;
     });
-
-    let newState = [...returnObj];
-
-    this.setState({
-      data: newState
-      // startTime: startHour,
-      // endTime: endHour
-    });
-  };
+    return returnObj;
+  }
 
   handleTimes = event => {
     event.preventDefault();
@@ -62,80 +53,68 @@ class RouteTimesForm extends Component {
     const endIndex = event.target["end-time"].selectedIndex;
     const getEndIndexForHour = timeIndices[endIndex];
 
-    this.setState({
-      startTime: getStartIndexForHour,
-      endTime: getEndIndexForHour
-    });
+    return {
+      startTimeIndex: getStartIndexForHour,
+      endTimeIndex: getEndIndexForHour
+    };
   };
 
-  getRouteStartData = () => {
+  updateWeatherData({ inputValues, startTimeIndex, endTimeIndex }) {
+    const startData = this.getStartData({ inputValues, startTimeIndex });
+    const endData = this.getEndData({ inputValues, endTimeIndex });
+    //const weatherData = {startData,endData};
+    //this.setState({weatherData});
+  }
+
+  getStartData({ inputValues, startTimeIndex }) {
     const startHourlyUrl = `http://api.wunderground.com/api/2b572770b27d6c40/hourly/q/${
-      this.state.startState
-    }/${this.state.startCity}/${this.state.startZip}.json`;
+      inputValues.startState
+    }/${inputValues.startCity}/${inputValues.startZip}.json`;
 
     fetch(startHourlyUrl)
       .then(response => {
         return response.json();
       })
-      .then(data => {
-        console.log(data);
-        this.setState({
-          weatherStart: data
-        });
-        // const starting =
+      .then(resp => {
         debugger;
-        this.state.weatherStart.map(weather => {
-          return (
-            <StartWeather
-              sun={weather.hourly_forecast[this.state.startTime].condition}
-              precipitation={
-                weather.hourly_forecast[this.state.startTime].qpf.english
-              }
-              temp={weather.hourly_forecast[this.state.startTime].temp.english}
-              windChill={
-                weather.hourly_forecast[this.state.startTime].feelslike.english
-              }
-            />
-          );
+        const weather = resp.hourly_forecast[startTimeIndex];
+        const sun = weather.condition;
+        const precipitation = weather.qpf.english;
+        const temp = weather.temp.english;
+        const windChill = weather.feelslike.english;
+        this.setState({
+          startWeather: { sun, precipitation, temp, windChill }
         });
       })
       .catch(error => {
         console.log(error);
       });
-  };
+  }
 
-  getRouteEndData = () => {
-    const endUrl = `http://api.wunderground.com/api/2b572770b27d6c40/hourly/q/${
-      this.state.endState
-    }/${this.state.endCity}/${this.state.endZip}.json`;
+  getEndData({ inputValues, endTimeIndex }) {
+    const hourlyUrl = `http://api.wunderground.com/api/2b572770b27d6c40/hourly/q/${
+      inputValues.endState
+    }/${inputValues.endCity}/${inputValues.endZip}.json`;
 
-    fetch(endUrl)
+    fetch(hourlyUrl)
       .then(response => {
         return response.json();
       })
-      .then(data => {
+      .then(resp => {
+        debugger;
+        const weather = resp.hourly_forecast[endTimeIndex];
+        const sun = weather.condition;
+        const precipitation = weather.qpf.english;
+        const temp = weather.temp.english;
+        const windChill = weather.feelslike.english;
         this.setState({
-          weatherEnd: data
-        });
-        this.state.weatherEnd.map(weather => {
-          return (
-            <EndWeather
-              sun={weather.hourly_forecast[this.state.endTime].condition}
-              precipitation={
-                weather.hourly_forecast[this.state.endTime].qpf.english
-              }
-              temp={weather.hourly_forecast[this.state.endTime].temp.english}
-              windChill={
-                weather.hourly_forecast[this.state.endTime].feelslike.english
-              }
-            />
-          );
+          endWeather: { sun, precipitation, temp, windChill }
         });
       })
       .catch(error => {
         console.log(error);
       });
-  };
+  }
 
   render() {
     const { startCity, startState, startZip, startTime } = this.state;
@@ -228,13 +207,13 @@ class RouteTimesForm extends Component {
               <strong>Start of Route Weather</strong>
             </li>
             <section id="results-start-weather">
-              <StartWeather fillStart={this.getRouteStartData} />
+              <StartWeather {...this.state.startWeather} />
             </section>
             <li className="list-group-item">
               <strong>End of Route Weather</strong>
             </li>
             <section id="results-end-weather">
-              <EndWeather fillEnd={this.getRouteEndData} />
+              <EndWeather {...this.state.endWeather} />
             </section>
           </ul>
         </div>

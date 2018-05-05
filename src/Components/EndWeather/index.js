@@ -1,24 +1,25 @@
 import React from "react";
 
 const EndWeather = props => {
+  const { sun, precipitation, temp, windChill } = props;
   return (
     <ul className="list-group list-group-flush">
       <h5>
         <u>Sunny/Cloudy</u>
       </h5>
-      <p id="end-cloudiness">{props.fillEnd.sun}</p>
+      <p id="end-cloudiness">{sun}</p>
       <h5>
         <u>Chance of Precipitation at End</u>
       </h5>
-      <p id="end-raininess">{props.fillEnd.precipitation}</p>
+      <p id="end-raininess">{precipitation}</p>
       <h5>
         <u>Temperature</u>
       </h5>
-      <p id="end-temp">{props.fillEnd.temp}</p>
+      <p id="end-temp">{temp}</p>
       <h5>
         <u>Wind Chill</u>
       </h5>
-      <p id="end-windiness">{props.fillEnd.windChill}</p>
+      <p id="end-windiness">{windChill}</p>
     </ul>
   );
 };
