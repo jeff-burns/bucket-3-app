@@ -9,8 +9,7 @@ const Instructions = () => {
           <strong>Quick Instructions</strong>
         </p>
         <p>
-          Pick start location and time, then end location and time (using
-          military time).
+          Pick start location and time, then end location and time.
         </p>
         <p>
           Please make sure to type the city and state in the exact formatting

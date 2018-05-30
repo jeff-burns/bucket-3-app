@@ -6,45 +6,47 @@ import StartWeather from "../StartWeather";
 import EndWeather from "../EndWeather";
 import timeIndices from "./utils";
 
-const inputData = {
-  startCity: "",
-  startState: "",
-  startZip: "",
-  endCity: "",
-  endState: "",
-  endZip: ""
-};
-const inputNames = Object.getOwnPropertyNames(inputData);
-
 class RouteTimesForm extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      data: [...inputNames],
-      startTime: 0,
-      endTime: 0,
-      startWeather: [],
-      endWeather: []
+      startWeather: {},
+      endWeather: {},
+      startCity: "",
+      startState: "",
+      startZip: "",
+      endCity: "",
+      endState: "",
+      endZip: ""
+      };
+        this.handleChange = this.handleChange.bind(this);
+  }
+
+  handleChange(event) {
+    const value = event.target.value
+    const name = event.target.name
+    this.setState({
+      [name]: value
+    })
+  }
+
+  handleSubmit(event) {
+    console.log(event.target)
+    event.preventDefault();
+    const formData = {
+      startCity: this.state.startCity,
+      startState: this.state.startState,
+      startZip: this.state.startZip,
+      endCity: this.state.endCity,
+      endState: this.state.endState,
+      endZip: this.state.endZip
     };
-  }
-
-  onSubmit(event) {
-    event.preventDefault();
-    const inputValues = this.handlePlaces(event);
+    console.log(formData)
     const { startTimeIndex, endTimeIndex } = this.handleTimes(event);
-    this.updateWeatherData({ inputValues, startTimeIndex, endTimeIndex });
-  }
+    this.updateWeatherData({ formData, startTimeIndex, endTimeIndex });
+  };
 
-  handlePlaces(event) {
-    event.preventDefault();
-    let returnObj = {};
-    inputNames.forEach(name => {
-      returnObj[name] = event.target[name].value;
-    });
-    return returnObj;
-  }
-
-  handleTimes = event => {
+  handleTimes(event) {
     event.preventDefault();
 
     const startIndex = event.target["start-time"].selectedIndex;
@@ -52,6 +54,7 @@ class RouteTimesForm extends Component {
 
     const endIndex = event.target["end-time"].selectedIndex;
     const getEndIndexForHour = timeIndices[endIndex];
+    console.log(getStartIndexForHour)
 
     return {
       startTimeIndex: getStartIndexForHour,
@@ -59,39 +62,44 @@ class RouteTimesForm extends Component {
     };
   };
 
-  updateWeatherData({ inputValues, startTimeIndex, endTimeIndex }) {
-    const startWeather = this.getStartData({ inputValues, startTimeIndex });
-    const endWeather = this.getEndData({ inputValues, endTimeIndex });
-    this.setState({ startWeather, endWeather });
+  updateWeatherData({ formData, startTimeIndex, endTimeIndex }) {
+    this.getStartData({ formData, startTimeIndex });
+    this.getEndData({ formData, endTimeIndex });
   }
 
-  getStartData({ inputValues, startTimeIndex }) {
-    const startHourlyUrl = `http://api.wunderground.com/api/2b572770b27d6c40/hourly/q/${
-      inputValues.startState
-    }/${inputValues.startCity}/${inputValues.startZip}.json`;
+  getStartData({ formData, startTimeIndex }) {
+    const startHourlyUrl = `https://cors-anywhere.herokuapp.com/http://api.wunderground.com/api/f2ac151de86fd0ea/hourly/q/${
+      formData.startState
+    }/${formData.startCity}.json`;
+    // /${formData.startZip}
 
     fetch(startHourlyUrl)
       .then(response => {
         return response.json();
       })
       .then(resp => {
+        console.log(resp)
         const weather = resp.hourly_forecast[startTimeIndex];
         const sun = weather.condition;
         const precipitation = weather.qpf.english;
         const temp = weather.temp.english;
         const windChill = weather.feelslike.english;
         const propsWeather = { sun, precipitation, temp, windChill };
-        return propsWeather;
-      })
+        console.log(propsWeather)
+        this.setState({ 
+          startWeather: propsWeather
+        })
+      })  
       .catch(error => {
         console.log(error);
       });
+      
   }
-
-  getEndData({ inputValues, endTimeIndex }) {
-    const hourlyUrl = `http://api.wunderground.com/api/2b572770b27d6c40/hourly/q/${
-      inputValues.endState
-    }/${inputValues.endCity}/${inputValues.endZip}.json`;
+  getEndData({ formData, endTimeIndex }) {
+    const hourlyUrl = `https://cors-anywhere.herokuapp.com/http://api.wunderground.com/api/f2ac151de86fd0ea/hourly/q/${
+      formData.endState
+    }/${formData.endCity}.json`;
+    // /${formData.endZip}
 
     fetch(hourlyUrl)
       .then(response => {
@@ -104,7 +112,9 @@ class RouteTimesForm extends Component {
         const temp = weather.temp.english;
         const windChill = weather.feelslike.english;
         const propsWeather = { sun, precipitation, temp, windChill };
-        return propsWeather;
+        this.setState({ 
+          endWeather: propsWeather
+        })
       })
       .catch(error => {
         console.log(error);
@@ -112,13 +122,17 @@ class RouteTimesForm extends Component {
   }
 
   render() {
-    const { startCity, startState, startZip, startTime } = this.state;
+    console.log(this.state)
+
+    const startWeather = this.state.startWeather
+    const endWeather = this.state.endWeather
+
     return (
       <div>
         <div className="card mb-3">
           <h3 className="card-header">ROUTE & TIMES</h3>
           <ul className="list-group list-group-flush">
-            <form className="form" onSubmit={this.onSubmit.bind(this)}>
+            <form className="form" onSubmit={(event) => this.handleSubmit(event)}>
               <div className="form-group">
                 <label htmlFor="search">Starting City</label>
                 <input
@@ -126,8 +140,9 @@ class RouteTimesForm extends Component {
                   className="form-control"
                   id="start-city"
                   name="startCity"
-                  value={startCity}
+                  value={this.state.startCity}
                   placeholder="Denver"
+                  onChange={this.handleChange}
                 />
                 <label htmlFor="search">Starting State</label>
                 <input
@@ -135,8 +150,9 @@ class RouteTimesForm extends Component {
                   className="form-control"
                   id="start-state"
                   name="startState"
-                  value={startState}
+                  value={this.state.startState}
                   placeholder="CO"
+                  onChange={this.handleChange}
                 />
                 <label htmlFor="search">Starting ZipCode</label>
                 <input
@@ -144,12 +160,13 @@ class RouteTimesForm extends Component {
                   className="form-control"
                   id="start-zip"
                   name="startZip"
-                  value={startZip}
+                  value={this.state.startZip}
                   placeholder="80210"
+                  onChange={this.handleChange}
                 />
                 <div className="card-header" />
 
-                <StartTime convertTime1={startTime} />
+                <StartTime />
                 <div className="card-header" />
 
                 <label htmlFor="search">Ending City</label>
@@ -160,6 +177,7 @@ class RouteTimesForm extends Component {
                   name="endCity"
                   value={this.state.endCity}
                   placeholder="Denver"
+                  onChange={this.handleChange}
                 />
                 <label htmlFor="search">Ending State</label>
                 <input
@@ -169,6 +187,7 @@ class RouteTimesForm extends Component {
                   name="endState"
                   value={this.state.endState}
                   placeholder="CO"
+                  onChange={this.handleChange}
                 />
                 <label htmlFor="search">Ending ZipCode</label>
                 <input
@@ -178,10 +197,11 @@ class RouteTimesForm extends Component {
                   name="endZip"
                   value={this.state.endZip}
                   placeholder="80202"
+                  onChange={this.handleChange}
                 />
                 <div className="card-header" />
 
-                <EndTime convertTime2={this.state.endTime} />
+                <EndTime />
 
                 <div className="card-header" />
               </div>
@@ -202,13 +222,13 @@ class RouteTimesForm extends Component {
               <strong>Start of Route Weather</strong>
             </li>
             <section id="results-start-weather">
-              <StartWeather {...this.state.startWeather} />
+              <StartWeather {...startWeather} />
             </section>
             <li className="list-group-item">
               <strong>End of Route Weather</strong>
             </li>
             <section id="results-end-weather">
-              <EndWeather {...this.state.endWeather} />
+              <EndWeather {...endWeather} />
             </section>
           </ul>
         </div>

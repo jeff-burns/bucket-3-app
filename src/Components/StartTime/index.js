@@ -3,6 +3,7 @@ import React from "react";
 var moment = require("moment");
 
 const StartTime = props => {
+  //timeNow will change each time it's iterated into the next half hour. logging timeNow after this function gives you the time 36 hours from this moment()
   const timeNow = moment();
   const numTimes = 35 * 2; // 36 hours, every half hour
   let timesArray = [];
@@ -10,6 +11,7 @@ const StartTime = props => {
     let timeStr = timeNow.add(30, "m").format("ddd h:mm a");
     timesArray.push(timeStr);
   }
+
   const options = (
     <select className="custom-select options" id="start-time">
       <option key={"pickStartTime"} value="">
