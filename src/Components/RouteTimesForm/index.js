@@ -17,21 +17,61 @@ class RouteTimesForm extends Component {
       startZip: "",
       endCity: "",
       endState: "",
-      endZip: ""
-      };
-        this.handleChange = this.handleChange.bind(this);
+      endZip: "",
+      userName: ""
+    };
+    this.handleChange = this.handleChange.bind(this);
   }
 
   handleChange(event) {
-    const value = event.target.value
-    const name = event.target.name
+    event.preventDefault()
+    const value = event.target.value;
+    const name = event.target.name;
     this.setState({
       [name]: value
-    })
+    });
+    console.log(this.state.userName)
+    const user = this.state.userName
+    if (user !== "") {
+      //running a check on the userInput table
+      //if there, autofill form
+      fetch(`http://localhost:3000/userinput/${user}`)
+      .then(response => {
+        return response.json();
+      })
+      .then(resp => {
+        console.log(resp);
+        this.handleAutoFill(resp)
+        
+      })
+    }
   }
 
+  handleAutoFill(resp) {
+    // let stateProperties = {
+      
+    //     this.state.startCity: "",
+    //     startState: "",
+    //     startZip: "",
+    //     endCity: "",
+    //     endState: "",
+    //     endZip: ""
+    //   }
+    // const autoFill = {
+    //   startCity: resp.user.startCity,
+    //   startState: resp.user.startState,
+    //   startZip: resp.user.startZip,
+    //   endCity: resp.user.endCity,
+    //   endState: resp.user.endState,
+    //   endZip: resp.user.endZip
+    // }
+    let autoFill = resp.user
+    console.log(autoFill)
+    return this.setState({ autoFill })
+  }
+    
+
   handleSubmit(event) {
-    console.log(event.target)
     event.preventDefault();
     const formData = {
       startCity: this.state.startCity,
@@ -39,12 +79,13 @@ class RouteTimesForm extends Component {
       startZip: this.state.startZip,
       endCity: this.state.endCity,
       endState: this.state.endState,
-      endZip: this.state.endZip
+      endZip: this.state.endZip,
+      userName: this.state.userName
     };
-    console.log(formData)
+    console.log(formData);
     const { startTimeIndex, endTimeIndex } = this.handleTimes(event);
     this.updateWeatherData({ formData, startTimeIndex, endTimeIndex });
-  };
+  }
 
   handleTimes(event) {
     event.preventDefault();
@@ -54,52 +95,55 @@ class RouteTimesForm extends Component {
 
     const endIndex = event.target["end-time"].selectedIndex;
     const getEndIndexForHour = timeIndices[endIndex];
-    console.log(getStartIndexForHour)
+    console.log(getStartIndexForHour);
 
     return {
       startTimeIndex: getStartIndexForHour,
       endTimeIndex: getEndIndexForHour
     };
-  };
+  }
 
   updateWeatherData({ formData, startTimeIndex, endTimeIndex }) {
     this.getStartData({ formData, startTimeIndex });
     this.getEndData({ formData, endTimeIndex });
+    //logs the user inputs for city, state, zip
+    console.log(this.state);
+    //fetch(userInput table, POST)
   }
 
   getStartData({ formData, startTimeIndex }) {
     const startHourlyUrl = `https://cors-anywhere.herokuapp.com/http://api.wunderground.com/api/f2ac151de86fd0ea/hourly/q/${
       formData.startState
-    }/${formData.startCity}.json`;
-    // /${formData.startZip}
+    }/${formData.startCity}/${formData.startZip}.json`;
+    //
 
     fetch(startHourlyUrl)
       .then(response => {
         return response.json();
       })
       .then(resp => {
-        console.log(resp)
+        console.log(resp);
         const weather = resp.hourly_forecast[startTimeIndex];
         const sun = weather.condition;
         const precipitation = weather.qpf.english;
         const temp = weather.temp.english;
         const windChill = weather.feelslike.english;
         const propsWeather = { sun, precipitation, temp, windChill };
-        console.log(propsWeather)
-        this.setState({ 
+        console.log(propsWeather);
+        this.setState({
           startWeather: propsWeather
-        })
-      })  
+        });
+      })
       .catch(error => {
         console.log(error);
       });
-      
+    //fetch(weathers table, POST)
   }
   getEndData({ formData, endTimeIndex }) {
     const hourlyUrl = `https://cors-anywhere.herokuapp.com/http://api.wunderground.com/api/f2ac151de86fd0ea/hourly/q/${
       formData.endState
-    }/${formData.endCity}.json`;
-    // /${formData.endZip}
+    }/${formData.endCity}/${formData.endZip}.json`;
+    //
 
     fetch(hourlyUrl)
       .then(response => {
@@ -112,9 +156,9 @@ class RouteTimesForm extends Component {
         const temp = weather.temp.english;
         const windChill = weather.feelslike.english;
         const propsWeather = { sun, precipitation, temp, windChill };
-        this.setState({ 
+        this.setState({
           endWeather: propsWeather
-        })
+        });
       })
       .catch(error => {
         console.log(error);
@@ -122,18 +166,29 @@ class RouteTimesForm extends Component {
   }
 
   render() {
-    console.log(this.state)
+    console.log(this.state);
 
-    const startWeather = this.state.startWeather
-    const endWeather = this.state.endWeather
+    const startWeather = this.state.startWeather;
+    const endWeather = this.state.endWeather;
 
     return (
       <div>
         <div className="card mb-3">
           <h3 className="card-header">ROUTE & TIMES</h3>
           <ul className="list-group list-group-flush">
-            <form className="form" onSubmit={(event) => this.handleSubmit(event)}>
+            <form className="form" onSubmit={event => this.handleSubmit(event)}>
               <div className="form-group">
+                <label htmlFor="search">User Name</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  id="userName"
+                  name="userName"
+                  value={this.state.userName}
+                  placeholder="Name"
+                  onChange={this.handleChange}
+                />
+
                 <label htmlFor="search">Starting City</label>
                 <input
                   type="text"
