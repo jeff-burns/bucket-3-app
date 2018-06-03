@@ -25,11 +25,13 @@ class RouteTimesForm extends Component {
       // autoFillEndCity: "",
       // autoFillEndState: "",
       // autoFillEndZip: "",
-      userBeingFilled: false
+      userBeingFilled: false,
+      previousUserChecked: false
     };
     this.handleChange = this.handleChange.bind(this);
     this.handleAutoFill = this.handleAutoFill.bind(this);
     this.isbeingfilled = this.isbeingfilled.bind(this);
+    this.handleClick = this.handleClick.bind(this);
   }
 
   handleChange(event) {
@@ -49,6 +51,15 @@ class RouteTimesForm extends Component {
         userBeingFilled: true
       });
       console.log(user);
+    }
+  }
+
+  handleClick(event) {
+    event.preventDefault()
+    if (event.target.checked) {
+      this.setState({
+        previousUserChecked: true
+      });
     }
   }
 
@@ -238,20 +249,23 @@ class RouteTimesForm extends Component {
                   isbeingfilled={this.isbeingfilled}
                   onBlur={this.handleAutoFill}
                 />
+                <fieldset className="form-group">
+                  <legend>Checkboxes</legend>
+                  <div className="form-check">
+                    <label className="form-check-label">
+                      <input className="form-check-input"     
+                            type="checkbox" 
+                            value="" 
+                            checked={this.state.previousUserChecked} 
+                            onClick={this.handleClick}/>
+                            If you're a previous user, Check this box to autofill your last route.
+                    </label>
+                  </div>
+                </fieldset>
 
                 <label htmlFor="search">Starting City</label>
 
-                {this.state.userBeingFilled === true ? (
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="start-city"
-                    name="startCity"
-                    value={this.state.autoFillStartCity}
-                    placeholder="Denver"
-                    onChange={this.handleChange}
-                  />
-                ) : (
+                
                   <input
                     type="text"
                     className="form-control"
@@ -261,7 +275,7 @@ class RouteTimesForm extends Component {
                     placeholder="Denver"
                     onChange={this.handleChange}
                   />
-                )}
+                
                 <label htmlFor="search">Starting State</label>
                 <input
                   type="text"
@@ -274,17 +288,7 @@ class RouteTimesForm extends Component {
                 />
                 <label htmlFor="search">Starting ZipCode</label>
 
-                {this.state.userbeingfilled === true ? (
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="start-zip"
-                    name="startZip"
-                    value={this.state.autoFillStartZip}
-                    placeholder="80210"
-                    onChange={this.handleChange}
-                  />
-                ) : (
+                
                   <input
                     type="text"
                     className="form-control"
@@ -294,7 +298,7 @@ class RouteTimesForm extends Component {
                     placeholder="80210"
                     onChange={this.handleChange}
                   />
-                )}
+                
                 <div className="card-header" />
 
                 <StartTime />
