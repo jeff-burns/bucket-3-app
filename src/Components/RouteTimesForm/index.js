@@ -18,58 +18,106 @@ class RouteTimesForm extends Component {
       endCity: "",
       endState: "",
       endZip: "",
-      userName: ""
+      userName: "",
+      // autoFillStartCity: "",
+      // autoFillStartState: "",
+      // autoFillStartZip: "",
+      // autoFillEndCity: "",
+      // autoFillEndState: "",
+      // autoFillEndZip: "",
+      userBeingFilled: false
     };
     this.handleChange = this.handleChange.bind(this);
+    this.handleAutoFill = this.handleAutoFill.bind(this);
+    this.isbeingfilled = this.isbeingfilled.bind(this);
   }
 
   handleChange(event) {
-    event.preventDefault()
+    event.preventDefault();
     const value = event.target.value;
     const name = event.target.name;
     this.setState({
       [name]: value
     });
-    console.log(this.state.userName)
-    const user = this.state.userName
+    this.isbeingfilled();
+  }
+
+  isbeingfilled() {
+    const user = this.state.userName;
     if (user !== "") {
-      //running a check on the userInput table
-      //if there, autofill form
-      fetch(`http://localhost:3000/userinput/${user}`)
-      .then(response => {
-        return response.json();
-      })
-      .then(resp => {
-        console.log(resp);
-        this.handleAutoFill(resp)
-        
-      })
+      this.setState({
+        userBeingFilled: true
+      });
+      console.log(user);
     }
   }
 
   handleAutoFill(resp) {
-    // let stateProperties = {
-      
-    //     this.state.startCity: "",
-    //     startState: "",
-    //     startZip: "",
-    //     endCity: "",
-    //     endState: "",
-    //     endZip: ""
-    //   }
-    // const autoFill = {
-    //   startCity: resp.user.startCity,
-    //   startState: resp.user.startState,
-    //   startZip: resp.user.startZip,
-    //   endCity: resp.user.endCity,
-    //   endState: resp.user.endState,
-    //   endZip: resp.user.endZip
-    // }
-    let autoFill = resp.user
-    console.log(autoFill)
-    return this.setState({ autoFill })
+    if (this.state.userBeingFilled === true) {
+      const user = this.state.userName;
+
+      fetch(`http://localhost:3000/userinput/${user}`)
+        .then(response => {
+          return response.json();
+        })
+        .then(resp => {
+          console.log(resp);
+          // this.handleAutoFill(resp)
+          let autoFillState = 
+            resp.user
+            // startCity: resp.user.startCity,
+            // startState: resp.user.startState,
+            // startZip: resp.user.startZip,
+            // endCity: resp.user.endCity,
+            // endState: resp.user.endState,
+            // endZip: resp.user.endZip
+          ;
+          // console.log(autoFill)
+          this.setState({ ...autoFillState });
+          console.log(this.state);
+        });
+    }
   }
-    
+
+  // handleAutoFill(resp) {
+  //   // event.preventDefault()
+  //   console.log(this.state.userName)
+  //   const user = this.state.userName
+  // // if (user !== "") {
+  //   // running a check on the userInput table
+  //   // if there, autofill form
+  //   // this.setState({
+  //   //   [name]: value
+  //   // });
+  //   fetch(`http://localhost:3000/userinput/${user}`)
+  //   .then(response => {
+  //     return response.json();
+  //   })
+  //   .then(resp => {
+  //     console.log(resp);
+  //     // this.handleAutoFill(resp)
+  //     let autoFill = resp.user
+  //     console.log(autoFill.startZip)
+  //     this.setState({
+  //       autoFillStartCity: autoFill.startCity,
+  //       autoFillStartState: autoFill.startState,
+  //       autoFillStartZip: autoFill.startZip,
+  //       autoFillEndCity: autoFill.endCity,
+  //       autoFillEndState: autoFill.endState,
+  //       autoFillEndZip: autoFill.endZip
+  //      })
+  //      console.log(this.state)
+  //   })
+  // }
+
+  // const autoFill = {
+  //   startCity: resp.user.startCity,
+  //   startState: resp.user.startState,
+  //   startZip: resp.user.startZip,
+  //   endCity: resp.user.endCity,
+  //   endState: resp.user.endState,
+  //   endZip: resp.user.endZip
+  // }
 
   handleSubmit(event) {
     event.preventDefault();
@@ -187,18 +235,33 @@ class RouteTimesForm extends Component {
                   value={this.state.userName}
                   placeholder="Name"
                   onChange={this.handleChange}
+                  isbeingfilled={this.isbeingfilled}
+                  onBlur={this.handleAutoFill}
                 />
 
                 <label htmlFor="search">Starting City</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  id="start-city"
-                  name="startCity"
-                  value={this.state.startCity}
-                  placeholder="Denver"
-                  onChange={this.handleChange}
-                />
+
+                {this.state.userBeingFilled === true ? (
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="start-city"
+                    name="startCity"
+                    value={this.state.autoFillStartCity}
+                    placeholder="Denver"
+                    onChange={this.handleChange}
+                  />
+                ) : (
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="start-city"
+                    name="startCity"
+                    value={this.state.startCity}
+                    placeholder="Denver"
+                    onChange={this.handleChange}
+                  />
+                )}
                 <label htmlFor="search">Starting State</label>
                 <input
                   type="text"
@@ -210,15 +273,28 @@ class RouteTimesForm extends Component {
                   onChange={this.handleChange}
                 />
                 <label htmlFor="search">Starting ZipCode</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  id="start-zip"
-                  name="startZip"
-                  value={this.state.startZip}
-                  placeholder="80210"
-                  onChange={this.handleChange}
-                />
+
+                {this.state.userbeingfilled === true ? (
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="start-zip"
+                    name="startZip"
+                    value={this.state.autoFillStartZip}
+                    placeholder="80210"
+                    onChange={this.handleChange}
+                  />
+                ) : (
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="start-zip"
+                    name="startZip"
+                    value={this.state.startZip}
+                    placeholder="80210"
+                    onChange={this.handleChange}
+                  />
+                )}
                 <div className="card-header" />
 
                 <StartTime />
