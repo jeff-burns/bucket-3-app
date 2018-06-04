@@ -187,112 +187,57 @@ class RouteTimesForm extends Component {
   }
 
   updateWeatherData({ formData, startTimeIndex, endTimeIndex }) {
-    this.getStartData({ formData, startTimeIndex });
-    this.getEndData({ formData, endTimeIndex });
-    //logs the user inputs for city, state, zip
-    console.log(this.state);
-    //fetch(userInput table, POST)
-  }
+    // getStartData({ formData, startTimeIndex }) {
 
-  getStartData({ formData, startTimeIndex }) {
-
-    //FETCH DELETE WEATHERS DATA HERE
-
-    fetch("http://localhost:3000/weathers", {
-        method: "DELETE",
-        headers: new Headers({
-          "content-type": "application/json"
-        }),
-        })
-        .then(function(response) {
-          return response.json();
-        })
-        .then(function(resp) {
-          console.log(resp);
-        
-        });
-
-    const startHourlyUrl = `https://cors-anywhere.herokuapp.com/http://api.wunderground.com/api/f2ac151de86fd0ea/hourly/q/${
-      formData.startState
-    }/${formData.startCity}/${formData.startZip}.json`;
-    //
-
-    fetch(startHourlyUrl)
-      .then(response => {
-        return response.json();
-      })
-      .then(response => {
-        console.log(response);
-        const firstWeather = response.hourly_forecast[startTimeIndex]
-        console.log(firstWeather);
-
-        //FETCH POST TO WEATHERS TABLE HERE
-        fetch("http://localhost:3000/weathers", {
-        method: "POST",
-        headers: new Headers({
-          "content-type": "application/json"
-        }),
-        body: JSON.stringify({
-          firstWeather: firstWeather
-        })
-      })
-        .then(function(response) {
-          return response.json();
-        })
-        .then(function(resp) {
-          console.log(resp);
-        });
-      })
-        //FETCH GET FROM WEATHERS TABLE HERE
-        fetch("http://localhost:3000/weathers")
+      //FETCH DELETE WEATHERS DATA HERE
+  
+      fetch("http://localhost:3000/weathers", {
+          method: "DELETE",
+          headers: new Headers({
+            "content-type": "application/json"
+          }),
+          })
+          .then(function(response) {
+            return response.json();
+          })
+          .then(function(resp) {
+            console.log(resp);
+          
+          });
+  
+      const startHourlyUrl = `https://cors-anywhere.herokuapp.com/http://api.wunderground.com/api/f2ac151de86fd0ea/hourly/q/${
+        formData.startState
+      }/${formData.startCity}/${formData.startZip}.json`;
+      //
+  
+      fetch(startHourlyUrl)
         .then(response => {
           return response.json();
         })
-        .then(resp => {
-          console.log(resp);
+        .then(response => {
+          console.log(response);
+          const firstWeather = response.hourly_forecast[startTimeIndex]
+          console.log(firstWeather);
 
-          const weather = resp[0].firstWeather.condition
+          //TRY ADDING END FETCH HERE AND COMBINING INTO ONE POST AND GET FROM THE DATABASE AFTER
 
-        // const weather = resp[0].firstWeather.hourly_forecast;
-        const sun = weather.condition;
-        const precipitation = weather.qpf.english;
-        const temp = weather.temp.english;
-        const windChill = weather.feelslike.english;
-        const propsWeather = { sun, precipitation, temp, windChill };
-        console.log(propsWeather);
-        this.setState({
-          startWeather: propsWeather
-        });
-      
-      })
-      .catch(error => {
-        console.log(error);
-      });
-    }
-
-
-
-
-
-  getEndData({ formData, endTimeIndex }) {
-    const hourlyUrl = `https://cors-anywhere.herokuapp.com/http://api.wunderground.com/api/f2ac151de86fd0ea/hourly/q/${
-      formData.endState
-    }/${formData.endCity}/${formData.endZip}.json`;
+          const hourlyUrl = `https://cors-anywhere.herokuapp.com/http://api.wunderground.com/api/f2ac151de86fd0ea/hourly/q/${formData.endState}/${formData.endCity}/${formData.endZip}.json`;
     
-    fetch(hourlyUrl)
-      .then(response => {
-        return response.json();
-      })
-      .then(response => {
-        const secondWeather = response.hourly_forecast[endTimeIndex]
-
-         //FETCH POST TO WEATHERS TABLE HERE
-         fetch("http://localhost:3000/weathers", {
+          fetch(hourlyUrl)
+            .then(response => {
+              return response.json();
+            })
+            .then(response => {
+              const secondWeather = response.hourly_forecast[endTimeIndex]
+  
+          //FETCH POST TO WEATHERS TABLE HERE
+          fetch("http://localhost:3000/weathers", {
           method: "POST",
           headers: new Headers({
             "content-type": "application/json"
           }),
           body: JSON.stringify({
+            firstWeather: firstWeather,
             secondWeather: secondWeather
           })
         })
@@ -303,31 +248,228 @@ class RouteTimesForm extends Component {
             console.log(resp);
           });
         })
-        //FETCH GET FROM WEATHERS TABLE HERE
-        fetch("http://localhost:3000/weathers")
-        .then(response => {
-          return response.json();
-        })
-        .then(resp => {
-          console.log(resp);
+      })
+          //FETCH GET FROM WEATHERS TABLE HERE
+          fetch("http://localhost:3000/weathers")
+          .then(response => {
+            return response.json();
+          })
+          .then(firstResponse => {
+            console.log(firstResponse);
+  
+            const first = firstResponse[0].firstWeather
+  
+          // const weather = resp[0].firstWeather.hourly_forecast;
+          const sun1 = first.condition;
+          const precipitation1 = first.qpf.english;
+          const temp1 = first.temp.english;
+          const windChill1 = first.feelslike.english;
+          const propsWeather1 = { sun1, precipitation1, temp1, windChill1 };
 
-          const weather = resp[1].firstWeather.condition
+          const second = firstResponse[0].secondWeather
 
-          const sun = weather.condition;
-          const precipitation = weather.qpf.english;
-          const temp = weather.temp.english;
-          const windChill = weather.feelslike.english;
-          const propsWeather = { sun, precipitation, temp, windChill };
-          console.log(propsWeather);
+          const sun2 = second.condition;
+          const precipitation2 = second.qpf.english;
+          const temp2 = second.temp.english;
+          const windChill2 = second.feelslike.english;
+          const propsWeather2 = { sun2, precipitation2, temp2, windChill2 };
+          console.log(propsWeather1);
           this.setState({
-            startWeather: propsWeather
+            startWeather: propsWeather1,
+            endWeather: propsWeather2
           });
+
+          console.log(propsWeather2);
+          // this.setState({
+          //   startWeather: propsWeather1
+          // });
         
         })
         .catch(error => {
           console.log(error);
         });
+      // }
+  
+    // this.getEndData({ formData, endTimeIndex });
+    //logs the user inputs for city, state, zip
+    console.log(this.state);
       }
+    //fetch(userInput table, POST)
+  
+  //FETCH GET FROM WEATHERS TABLE HERE
+  //         fetch("http://localhost:3000/weathers")
+  //         .then(response => {
+  //           return response.json();
+  //         })
+  //         .then(firstResponse => {
+  //           console.log(firstResponse);
+  
+  //           const first = firstResponse[0].firstWeather
+  
+  //         // const weather = resp[0].firstWeather.hourly_forecast;
+  //         const sun1 = first.condition;
+  //         const precipitation1 = first.qpf.english;
+  //         const temp1 = first.temp.english;
+  //         const windChill1 = first.feelslike.english;
+  //         const propsWeather1 = { sun1, precipitation1, temp1, windChill1 };
+
+  //         const second = firstResponse[0].secondWeather
+
+  //         const sun2 = second.condition;
+  //         const precipitation2 = second.qpf.english;
+  //         const temp2 = second.temp.english;
+  //         const windChill2 = second.feelslike.english;
+  //         const propsWeather2 = { sun2, precipitation2, temp2, windChill2 };
+  //         console.log(propsWeather1);
+  //         this.setState({
+  //           startWeather: propsWeather1,
+  //           endWeather: propsWeather2
+  //         });
+
+  //         console.log(propsWeather2);
+  //         // this.setState({
+  //         //   startWeather: propsWeather1
+  //         // });
+        
+  //       })
+  //       .catch(error => {
+  //         console.log(error);
+  //       });
+  // }
+  // getStartData({ formData, startTimeIndex }) {
+
+  //   //FETCH DELETE WEATHERS DATA HERE
+
+  //   fetch("http://localhost:3000/weathers", {
+  //       method: "DELETE",
+  //       headers: new Headers({
+  //         "content-type": "application/json"
+  //       }),
+  //       })
+  //       .then(function(response) {
+  //         return response.json();
+  //       })
+  //       .then(function(resp) {
+  //         console.log(resp);
+        
+  //       });
+
+  //   const startHourlyUrl = `https://cors-anywhere.herokuapp.com/http://api.wunderground.com/api/f2ac151de86fd0ea/hourly/q/${
+  //     formData.startState
+  //   }/${formData.startCity}/${formData.startZip}.json`;
+  //   //
+
+  //   fetch(startHourlyUrl)
+  //     .then(response => {
+  //       return response.json();
+  //     })
+  //     .then(response => {
+  //       console.log(response);
+  //       const firstWeather = response.hourly_forecast[startTimeIndex]
+  //       console.log(firstWeather);
+
+  //       //FETCH POST TO WEATHERS TABLE HERE
+  //       fetch("http://localhost:3000/weathers", {
+  //       method: "POST",
+  //       headers: new Headers({
+  //         "content-type": "application/json"
+  //       }),
+  //       body: JSON.stringify({
+  //         firstWeather: firstWeather
+  //       })
+  //     })
+  //       .then(function(response) {
+  //         return response.json();
+  //       })
+  //       .then(function(resp) {
+  //         console.log(resp);
+  //       });
+  //     })
+  //       //FETCH GET FROM WEATHERS TABLE HERE
+  //       fetch("http://localhost:3000/weathers")
+  //       .then(response => {
+  //         return response.json();
+  //       })
+  //       .then(resp => {
+  //         console.log(resp);
+
+  //         const weather = resp[0].firstWeather.condition
+
+  //       // const weather = resp[0].firstWeather.hourly_forecast;
+  //       const sun = weather.condition;
+  //       const precipitation = weather.qpf.english;
+  //       const temp = weather.temp.english;
+  //       const windChill = weather.feelslike.english;
+  //       const propsWeather = { sun, precipitation, temp, windChill };
+  //       console.log(propsWeather);
+  //       this.setState({
+  //         startWeather: propsWeather
+  //       });
+      
+  //     })
+  //     .catch(error => {
+  //       console.log(error);
+  //     });
+  //   }
+
+
+
+
+
+  // getEndData({ formData, endTimeIndex }) {
+  //   const hourlyUrl = `https://cors-anywhere.herokuapp.com/http://api.wunderground.com/api/f2ac151de86fd0ea/hourly/q/${
+  //     formData.endState
+  //   }/${formData.endCity}/${formData.endZip}.json`;
+    
+  //   fetch(hourlyUrl)
+  //     .then(response => {
+  //       return response.json();
+  //     })
+  //     .then(response => {
+  //       const secondWeather = response.hourly_forecast[endTimeIndex]
+
+         //FETCH POST TO WEATHERS TABLE HERE
+        //  fetch("http://localhost:3000/weathers", {
+        //   method: "POST",
+        //   headers: new Headers({
+        //     "content-type": "application/json"
+        //   }),
+        //   body: JSON.stringify({
+        //     secondWeather: secondWeather
+        //   })
+        // })
+        //   .then(function(response) {
+        //     return response.json();
+        //   })
+        //   .then(function(resp) {
+        //     console.log(resp);
+        //   });
+        // })
+        //FETCH GET FROM WEATHERS TABLE HERE
+      //   fetch("http://localhost:3000/weathers")
+      //   .then(response => {
+      //     return response.json();
+      //   })
+      //   .then(resp => {
+      //     console.log(resp);
+
+      //     const second = resp[0].secondWeather.condition
+
+      //     const sun2 = weather.condition;
+      //     const precipitation2 = weather.qpf.english;
+      //     const temp2 = weather.temp.english;
+      //     const windChill2 = weather.feelslike.english;
+      //     const propsWeather2 = { sun2, precipitation2, temp2, windChill2 };
+      //     console.log(propsWeather);
+      //     this.setState({
+      //       endWeather: propsWeather2
+      //     });
+        
+      //   })
+      //   .catch(error => {
+      //     console.log(error);
+      //   });
+      // }
 
       // const secondWeather = response[1].secondWeather.hourly_forecast[endTimeIndex]
       // secondWeather: secondWeather
