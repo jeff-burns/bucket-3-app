@@ -73,17 +73,8 @@ class RouteTimesForm extends Component {
         })
         .then(resp => {
           console.log(resp);
-          // this.handleAutoFill(resp)
           let autoFillState = 
-            resp.user
-            // startCity: resp.user.startCity,
-            // startState: resp.user.startState,
-            // startZip: resp.user.startZip,
-            // endCity: resp.user.endCity,
-            // endState: resp.user.endState,
-            // endZip: resp.user.endZip
-          ;
-          // console.log(autoFill)
+            resp.user;
           this.setState({ ...autoFillState });
           console.log(this.state);
         });
@@ -143,6 +134,39 @@ class RouteTimesForm extends Component {
     };
     console.log(formData);
     const { startTimeIndex, endTimeIndex } = this.handleTimes(event);
+    const user = this.state.userName;
+
+    if (this.state.userBeingFilled === true && this.state.previousUserChecked === true) {
+      fetch(`http://localhost:3000/userinput/${user}`, {
+        method: "PUT",
+        headers: new Headers({
+          "content-type": "application/json"
+        }),
+        body: JSON.stringify(formData)
+      })
+        .then(function(response) {
+          return response.json();
+        })
+        .then(function(response) {
+          console.log(response);
+        });
+    
+    } if (this.state.userBeingFilled === true) {
+      fetch("http://localhost:3000/userinput", {
+        method: "POST",
+        headers: new Headers({
+          "content-type": "application/json"
+        }),
+        body: JSON.stringify(formData)
+      })
+        .then(function(response) {
+          return response.json();
+        })
+        .then(function(response) {
+          console.log(response);
+        });
+    }
+    
     this.updateWeatherData({ formData, startTimeIndex, endTimeIndex });
   }
 
@@ -171,6 +195,28 @@ class RouteTimesForm extends Component {
   }
 
   getStartData({ formData, startTimeIndex }) {
+
+    //FETCH DELETE WEATHERS DATA HERE
+
+    // fetch("http://localhost:3000/weathers", {
+    //     method: "DELETE",
+    //     headers: new Headers({
+    //       "content-type": "application/json"
+    //     }),
+    //     body: JSON.stringify({
+    //       firstWeather: [""],
+    //       secondWeather: [""]
+    //     }
+    //     )
+    //   })
+    //     .then(function(response) {
+    //       return response.json();
+    //     })
+    //     .then(function(resp) {
+    //       console.log(resp);
+        
+    //     });
+
     const startHourlyUrl = `https://cors-anywhere.herokuapp.com/http://api.wunderground.com/api/f2ac151de86fd0ea/hourly/q/${
       formData.startState
     }/${formData.startCity}/${formData.startZip}.json`;
@@ -180,9 +226,39 @@ class RouteTimesForm extends Component {
       .then(response => {
         return response.json();
       })
-      .then(resp => {
-        console.log(resp);
-        const weather = resp.hourly_forecast[startTimeIndex];
+      .then(response => {
+        console.log(response);
+        const firstWeather = response.hourly_forecast[startTimeIndex]
+        console.log(firstWeather);
+
+        //FETCH POST TO WEATHERS TABLE HERE
+        fetch("http://localhost:3000/weathers", {
+        method: "POST",
+        headers: new Headers({
+          "content-type": "application/json"
+        }),
+        body: JSON.stringify({
+          firstWeather: firstWeather
+        })
+      })
+        .then(function(response) {
+          return response.json();
+        })
+        .then(function(resp) {
+          console.log(resp);
+        });
+      })
+        //FETCH GET FROM WEATHERS TABLE HERE
+        fetch("http://localhost:3000/weathers")
+        .then(response => {
+          return response.json();
+        })
+        .then(resp => {
+          console.log(resp);
+
+          const weather = resp[1].firstWeather.hourly_forecast[startTimeIndex]
+
+        // const weather = resp[0].firstWeather.hourly_forecast;
         const sun = weather.condition;
         const precipitation = weather.qpf.english;
         const temp = weather.temp.english;
@@ -192,12 +268,13 @@ class RouteTimesForm extends Component {
         this.setState({
           startWeather: propsWeather
         });
+      
       })
       .catch(error => {
         console.log(error);
       });
-    //fetch(weathers table, POST)
-  }
+    }
+
   getEndData({ formData, endTimeIndex }) {
     const hourlyUrl = `https://cors-anywhere.herokuapp.com/http://api.wunderground.com/api/f2ac151de86fd0ea/hourly/q/${
       formData.endState
@@ -209,6 +286,8 @@ class RouteTimesForm extends Component {
         return response.json();
       })
       .then(resp => {
+        
+
         const weather = resp.hourly_forecast[endTimeIndex];
         const sun = weather.condition;
         const precipitation = weather.qpf.english;
@@ -219,6 +298,11 @@ class RouteTimesForm extends Component {
           endWeather: propsWeather
         });
       })
+
+      // const secondWeather = response[1].secondWeather.hourly_forecast[endTimeIndex]
+      // secondWeather: secondWeather
+
+
       .catch(error => {
         console.log(error);
       });
@@ -265,7 +349,6 @@ class RouteTimesForm extends Component {
 
                 <label htmlFor="search">Starting City</label>
 
-                
                   <input
                     type="text"
                     className="form-control"
@@ -288,7 +371,6 @@ class RouteTimesForm extends Component {
                 />
                 <label htmlFor="search">Starting ZipCode</label>
 
-                
                   <input
                     type="text"
                     className="form-control"
