@@ -27,18 +27,3 @@ const EndTime = props => {
 };
 
 export default EndTime;
-
-// const minute = timeNow.minutes()
-// const hour = timeNow.hours() + 1
-// const rounded = minute > 29 ? 00 : 30;
-// timeNow.minutes(rounded);
-
-//     const options2 = () => {
-//         for (let i = 0; i < numTimes2; i++) {
-//             let optionTime2 = React.createElement('option')
-//                 const timeStr2 = timeNow2.add(30,'minute').format('k:mm');
-//                 optionTime2.setAttribute('value', timeStr2)
-//                 optionTime2.textContent = timeStr2;
-//                 // startDropdown.appendChild(optionTime)
-//     }
-// }
