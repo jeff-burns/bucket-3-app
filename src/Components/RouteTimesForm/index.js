@@ -60,7 +60,7 @@ class RouteTimesForm extends Component {
     if (this.state.userBeingFilled === true) {
       const user = this.state.userName;
 
-      fetch(`http://localhost:3000/userinput/${user}`)
+      fetch(`https://agile-thicket-79673.herokuapp.com/userinput/${user}`)
         .then(response => {
           return response.json();
         })
@@ -87,7 +87,7 @@ class RouteTimesForm extends Component {
     const user = this.state.userName;
     //UPDATE OR POST TO USERINPUT TABLE
     if (this.state.previousUserChecked === true) {
-      fetch(`http://localhost:3000/userinput/${user}`, {
+      fetch(`https://agile-thicket-79673.herokuapp.com/userinput/${user}`, {
         method: "PUT",
         headers: new Headers({
           "content-type": "application/json"
@@ -101,7 +101,7 @@ class RouteTimesForm extends Component {
           console.log(response);
         });
     } else {
-      fetch("http://localhost:3000/userinput", {
+      fetch("https://agile-thicket-79673.herokuapp.com/userinput", {
         method: "POST",
         headers: new Headers({
           "content-type": "application/json"
@@ -132,7 +132,7 @@ class RouteTimesForm extends Component {
 
   updateWeatherData({ formData, startTimeIndex, endTimeIndex }) {
     //FETCH DELETE WEATHERS DATA HERE
-    fetch("http://localhost:3000/weathers", {
+    fetch("https://agile-thicket-79673.herokuapp.com/weathers", {
       method: "DELETE",
       headers: new Headers({
         "content-type": "application/json"
@@ -165,10 +165,11 @@ class RouteTimesForm extends Component {
             return response.json();
           })
           .then(response => {
+            console.log(response);
             const secondWeather = response.hourly_forecast[endTimeIndex];
 
             //FETCH POST TO WEATHERS TABLE HERE
-            fetch("http://localhost:3000/weathers", {
+            fetch("https://agile-thicket-79673.herokuapp.com/weathers", {
               method: "POST",
               headers: new Headers({
                 "content-type": "application/json"
@@ -187,11 +188,12 @@ class RouteTimesForm extends Component {
           });
       });
     //FETCH GET FROM WEATHERS TABLE HERE
-    fetch("http://localhost:3000/weathers")
+    fetch("https://agile-thicket-79673.herokuapp.com/weathers")
       .then(response => {
         return response.json();
       })
       .then(firstResponse => {
+        console.log(firstResponse)
         const first = firstResponse[0].firstWeather;
 
         const sun1 = first.condition;
