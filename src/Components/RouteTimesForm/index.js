@@ -1,332 +1,359 @@
-import React, { Component } from 'react';
+import React, { Component } from "react";
 
 import StartTime from "../StartTime";
 import EndTime from "../EndTime";
 import StartWeather from "../StartWeather";
 import EndWeather from "../EndWeather";
-
-const inputData = { startCity: "", startState: "", startZip: "", endCity: "", endState: "", endZip: ""}
-const inputNames = Object.getOwnPropertyNames(inputData);
+import timeIndices from "./utils";
 
 class RouteTimesForm extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-          data: [...inputNames],
-          startTime: 0,
-          endTime: 0
-        };
-    }
-
-    onSubmit = (event) => {
-        event.preventDefault();
-        this.handlePlaces(event)
-        this.handleTimes(event)
-    }
-
-    handlePlaces = (event) => {
-        event.preventDefault();
-
-        let returnObj = {};
-
-        inputNames.forEach(name => {
-        returnObj[name] = event.target[name].value;
-        });
-
-        let newState = [...returnObj]
-
-        this.setState({
-            data: newState
-            // startTime: startHour,
-            // endTime: endHour
-        })
-        this.getRouteStartData.bind(this)
-        this.getRouteEndData.bind(this)
+  constructor(props) {
+    super(props);
+    this.state = {
+      startWeather: {},
+      endWeather: {},
+      startCity: "",
+      startState: "",
+      startZip: "",
+      endCity: "",
+      endState: "",
+      endZip: "",
+      userName: "",
+      userBeingFilled: false,
+      previousUserChecked: false
     };
+    this.handleChange = this.handleChange.bind(this);
+    this.handleAutoFill = this.handleAutoFill.bind(this);
+    this.isbeingfilled = this.isbeingfilled.bind(this);
+    this.handleClick = this.handleClick.bind(this);
+  }
 
-    handleTimes = (event) => {
-        event.preventDefault();
+  handleChange(event) {
+    event.preventDefault();
+    const value = event.target.value;
+    const name = event.target.name;
+    this.setState({
+      [name]: value
+    });
+    this.isbeingfilled();
+  }
 
-        const startIndex = event.target.convertTime1.selectedIndex
-        const getStartIndexForHour = (startIndex) => {
-            if (startIndex < 5) {
-                return  1
-                } else if (startIndex < 7) {
-                return  2
-                } else if (startIndex < 9) {
-                return 3
-                } else if (startIndex < 11) {
-                 return 4
-                } else if (startIndex < 13) {
-                return  5
-                } else if (startIndex < 15) {
-                return  6
-                } else if (startIndex < 17) {
-                return  7
-                } else if (startIndex < 19) {
-                return 8
-                } else if (startIndex < 21) {
-                return 9
-                } else if (startIndex < 23) {
-                return 10
-                } else if (startIndex < 25) {
-                return  11
-                } else if (startIndex < 27) {
-                return  12
-                } else if (startIndex < 29) {
-                return  13
-                } else if (startIndex < 31) {
-                return  14
-                } else if (startIndex < 33) {
-                return  15
-                } else if (startIndex < 35) {
-                return  16
-                } else if (startIndex < 37) {
-                return  17
-                } else if (startIndex < 39) {
-                return  18
-                } else if (startIndex < 41) {
-                return  19
-                } else if (startIndex < 43) {
-                return  20
-                } else if (startIndex < 45) {
-                return  21
-                } else if (startIndex < 47) {
-                return  22
-                } else if (startIndex < 49) {
-                return  23
-                } else if (startIndex < 51) {
-                return  24
-                } else if (startIndex < 53) {
-                return  25
-                } else if (startIndex < 55) {
-                return  26
-                } else if (startIndex < 57) {
-                return  27
-                } else if (startIndex < 59) {
-                return  28
-                } else if (startIndex < 61) {
-                return  29
-                } else if (startIndex < 63) {
-                return  30
-                } else if (startIndex < 65) {
-                return  31
-                } else if (startIndex < 67) {
-                return  32
-                } else if (startIndex < 69) {
-                return  33
-                } else if (startIndex < 71) {
-                return  34
-                } else {
-                return  35
-                }
-        }
-
-        const endIndex = event.target.convertTime2.selectedIndex
-        const getEndIndexForHour = (endIndex) => {
-            if (endIndex < 5) {
-                return  1
-                } else if (endIndex < 7) {
-                return  2
-                } else if (endIndex < 9) {
-                return 3
-                } else if (endIndex < 11) {
-                 return 4
-                } else if (endIndex < 13) {
-                return  5
-                } else if (endIndex < 15) {
-                return  6
-                } else if (endIndex < 17) {
-                return  7
-                } else if (endIndex < 19) {
-                return 8
-                } else if (endIndex < 21) {
-                return 9
-                } else if (endIndex < 23) {
-                return 10
-                } else if (endIndex < 25) {
-                return  11
-                } else if (endIndex < 27) {
-                return  12
-                } else if (endIndex < 29) {
-                return  13
-                } else if (endIndex < 31) {
-                return  14
-                } else if (endIndex < 33) {
-                return  15
-                } else if (endIndex < 35) {
-                return  16
-                } else if (endIndex < 37) {
-                return  17
-                } else if (endIndex < 39) {
-                return  18
-                } else if (endIndex < 41) {
-                return  19
-                } else if (endIndex < 43) {
-                return  20
-                } else if (endIndex < 45) {
-                return  21
-                } else if (endIndex < 47) {
-                return  22
-                } else if (endIndex < 49) {
-                return  23
-                } else if (endIndex < 51) {
-                return  24
-                } else if (endIndex < 53) {
-                return  25
-                } else if (endIndex < 55) {
-                return  26
-                } else if (endIndex < 57) {
-                return  27
-                } else if (endIndex < 59) {
-                return  28
-                } else if (endIndex < 61) {
-                return  29
-                } else if (endIndex < 63) {
-                return  30
-                } else if (endIndex < 65) {
-                return  31
-                } else if (endIndex < 67) {
-                return  32
-                } else if (endIndex < 69) {
-                return  33
-                } else if (endIndex < 71) {
-                return  34
-                } else {
-                return  35
-                }
-        }
-
-        this.setState({
-            
-            startTime: getStartIndexForHour,
-            endTime: getEndIndexForHour
-        })
+  isbeingfilled() {
+    const user = this.state.userName;
+    if (user !== "") {
+      this.setState({
+        userBeingFilled: true
+      });
     }
+  }
 
-    getRouteStartData = () => {
+  handleClick(event) {
+    event.preventDefault();
+    if (event.target.checked) {
+      this.setState({
+        previousUserChecked: true
+      });
+    }
+  }
 
-        const startHourlyUrl = `http://api.wunderground.com/api/2b572770b27d6c40/hourly/q/${this.state.startState}/${this.state.startCity}/${this.state.startZip}.json`
-    
-        fetch(startHourlyUrl)
+  handleAutoFill(resp) {
+    if (this.state.userBeingFilled === true) {
+      const user = this.state.userName;
+
+      fetch(`https://agile-thicket-79673.herokuapp.com/userinput/${user}`)
+        .then(response => {
+          return response.json();
+        })
+        .then(resp => {
+          console.log(resp);
+          let autoFillState = resp.user;
+          this.setState({ ...autoFillState });
+        });
+    }
+  }
+
+  handleSubmit(event) {
+    event.preventDefault();
+    const formData = {
+      startCity: this.state.startCity,
+      startState: this.state.startState,
+      startZip: this.state.startZip,
+      endCity: this.state.endCity,
+      endState: this.state.endState,
+      endZip: this.state.endZip,
+      userName: this.state.userName
+    };
+    const { startTimeIndex, endTimeIndex } = this.handleTimes(event);
+    const user = this.state.userName;
+    //UPDATE OR POST TO USERINPUT TABLE
+    if (this.state.previousUserChecked === true) {
+      fetch(`https://agile-thicket-79673.herokuapp.com/userinput/${user}`, {
+        method: "PUT",
+        headers: new Headers({
+          "content-type": "application/json"
+        }),
+        body: JSON.stringify(formData)
+      })
+        .then(function(response) {
+          return response.json();
+        })
+        .then(function(response) {
+          console.log(response);
+        });
+    } else {
+      fetch("https://agile-thicket-79673.herokuapp.com/userinput", {
+        method: "POST",
+        headers: new Headers({
+          "content-type": "application/json"
+        }),
+        body: JSON.stringify(formData)
+      })
+        .then(function(response) {
+          return response.json();
+        })
+        .then(function(response) {
+          console.log(response);
+        });
+    }
+    this.updateWeatherData({ formData, startTimeIndex, endTimeIndex });
+  }
+
+  handleTimes(event) {
+    event.preventDefault();
+    const startIndex = event.target["start-time"].selectedIndex;
+    const getStartIndexForHour = timeIndices[startIndex];
+    const endIndex = event.target["end-time"].selectedIndex;
+    const getEndIndexForHour = timeIndices[endIndex];
+    return {
+      startTimeIndex: getStartIndexForHour,
+      endTimeIndex: getEndIndexForHour
+    };
+  }
+
+  updateWeatherData({ formData, startTimeIndex, endTimeIndex }) {
+    //FETCH DELETE WEATHERS DATA HERE
+    fetch("https://agile-thicket-79673.herokuapp.com/weathers", {
+      method: "DELETE",
+      headers: new Headers({
+        "content-type": "application/json"
+      })
+    })
+      .then(function(response) {
+        return response.json();
+      })
+      .then(function(resp) {
+        console.log(resp);
+      });
+
+    const startHourlyUrl = `https://cors-anywhere.herokuapp.com/http://api.wunderground.com/api/f2ac151de86fd0ea/hourly/q/${
+      formData.startState
+    }/${formData.startCity}/${formData.startZip}.json`;
+    fetch(startHourlyUrl)
+      .then(response => {
+        return response.json();
+      })
+      .then(response => {
+        console.log(response);
+        const firstWeather = response.hourly_forecast[startTimeIndex];
+
+        const hourlyUrl = `https://cors-anywhere.herokuapp.com/http://api.wunderground.com/api/f2ac151de86fd0ea/hourly/q/${
+          formData.endState
+        }/${formData.endCity}/${formData.endZip}.json`;
+
+        fetch(hourlyUrl)
           .then(response => {
             return response.json();
           })
-          .then(data => {
-            console.log(data);
-            this.setState({
-              weatherStart: data
-            });
-            // const starting = 
-            this.state.weatherStart.map(weather => {
-                return (
-                  <StartWeather
-                    sun={weather.hourly_forecast[this.state.startTime].condition}
-                    precipitation={weather.hourly_forecast[this.state.startTime].qpf.english}
-                    temp={weather.hourly_forecast[this.state.startTime].temp.english}
-                    windChill={weather.hourly_forecast[this.state.startTime].feelslike.english}
-                  />
-                );
-            });
-          })
-          .catch(error => {
-            console.log(error);
-          });
-    }
+          .then(response => {
+            console.log(response);
+            const secondWeather = response.hourly_forecast[endTimeIndex];
 
-    getRouteEndData = () => {
-
-    const endUrl = `http://api.wunderground.com/api/2b572770b27d6c40/hourly/q/${this.state.endState}/${this.state.endCity}/${this.state.endZip}.json`
-
-    fetch(endUrl)
-        .then(response => {
-        return response.json();
-        })
-        .then(data => {
-            this.setState({
-                weatherEnd: data
-            });
-            this.state.weatherEnd.map(weather => {
-                return (
-                  <EndWeather
-                    sun={weather.hourly_forecast[this.state.endTime].condition}
-                    precipitation={weather.hourly_forecast[this.state.endTime].qpf.english}
-                    temp={weather.hourly_forecast[this.state.endTime].temp.english}
-                    windChill={weather.hourly_forecast[this.state.endTime].feelslike.english}
-                  />
-                );
+            //FETCH POST TO WEATHERS TABLE HERE
+            fetch("https://agile-thicket-79673.herokuapp.com/weathers", {
+              method: "POST",
+              headers: new Headers({
+                "content-type": "application/json"
+              }),
+              body: JSON.stringify({
+                firstWeather: firstWeather,
+                secondWeather: secondWeather
+              })
+            })
+              .then(function(response) {
+                return response.json();
+              })
+              .then(function(resp) {
+                console.log(resp);
               });
-            
-        })
-        .catch(error => {
-        console.log(error);
+          });
+      });
+    //FETCH GET FROM WEATHERS TABLE HERE
+    fetch("https://agile-thicket-79673.herokuapp.com/weathers")
+      .then(response => {
+        return response.json();
+      })
+      .then(firstResponse => {
+        console.log(firstResponse)
+        const first = firstResponse[0].firstWeather;
+
+        const sun1 = first.condition;
+        const precipitation1 = first.qpf.english;
+        const temp1 = first.temp.english;
+        const windChill1 = first.feelslike.english;
+        const propsWeather1 = { sun1, precipitation1, temp1, windChill1 };
+
+        const second = firstResponse[0].secondWeather;
+
+        const sun2 = second.condition;
+        const precipitation2 = second.qpf.english;
+        const temp2 = second.temp.english;
+        const windChill2 = second.feelslike.english;
+        const propsWeather2 = { sun2, precipitation2, temp2, windChill2 };
+        this.setState({
+          startWeather: propsWeather1,
+          endWeather: propsWeather2
         });
-    }
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  }
 
-    render() {
-        return (
-            <div>
-            <div className="card mb-3">
-                <h3 className="card-header">ROUTE & TIMES</h3>
-                <ul className="list-group list-group-flush">
-                    <form className="form" onSubmit={this.onSubmit.bind(this)}>
-                        <div className="form-group">
-                            <label htmlFor="search">Starting City</label>
-                            <input type="text" className="form-control" id="start-city"  name="startCity" value={this.state.startCity} placeholder="Denver"></input>
-                            <label htmlFor="search">Starting State</label>
-                            <input type="text" className="form-control" id="start-state" name="startState" value={this.state.startState} placeholder="CO"></input>
-                            <label htmlFor="search">Starting ZipCode</label>
-                            <input type="text" className="form-control" id="start-zip" name="startZip" value={this.state.startZip} placeholder="80210"></input>
-                            <div className="card-header"></div>
-                             
-                            <StartTime convertTime1={this.state.startTime}
-                                       handleTimes={this.handleTimes.bind(this)}
-                            />     
-                            <div className="card-header"></div>
-                                
-                            <label htmlFor="search">Ending City</label>
-                            <input type="text" className="form-control" id="end-city" name="endCity" value={this.state.endCity} placeholder="Denver"></input>
-                            <label htmlFor="search">Ending State</label>
-                            <input type="text" className="form-control" id="end-state" name="endState" value={this.state.endState} placeholder="CO"></input>
-                            <label htmlFor="search">Ending ZipCode</label>
-                            <input type="text" className="form-control" id="end-zip" name="endZip" value={this.state.endZip} placeholder="80202"></input>
-                            <div className="card-header"></div>
-
-                            <EndTime convertTime2={this.state.endTime}
-                                     handleTimes={this.handleTimes.bind(this)}
-                            />
-
-                            <div className="card-header"></div>
-                        </div>
-                        <button id="submit-button" type="submit" className="btn btn-success btn-lg btn-block">
-                            Search
-                        </button>
-                    </form>
-                </ul>
-            </div>
-            <div className="card mb-3">
-      <h3 className="card-header">WEATHER</h3>
-      <ul className="list-group list-group-flush">
-        <li className="list-group-item">
-          <strong>Start of Route Weather</strong>
-        </li>
-        <section id="results-start-weather">
-        <StartWeather fillStart={this.getRouteStartData} />
-        </section>
-        <li className="list-group-item">
-          <strong>End of Route Weather</strong>
-        </li>
-        <section id="results-end-weather">
-        <EndWeather fillEnd={this.getRouteEndData} />
-        </section>
-      </ul>
-    </div>
-    </div>
-        )
-    }
+  render() {
+    const startWeather = this.state.startWeather;
+    const endWeather = this.state.endWeather;
+    return (
+      <div>
+        <div className="card mb-3">
+          <h3 className="card-header">ROUTE & TIMES</h3>
+          <ul className="list-group list-group-flush">
+            <form className="form" onSubmit={event => this.handleSubmit(event)}>
+              <div className="form-group">
+                <label htmlFor="search">User Name (OPTIONAL)</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  id="userName"
+                  name="userName"
+                  value={this.state.userName}
+                  placeholder="Name"
+                  onChange={this.handleChange}
+                  isbeingfilled={this.isbeingfilled}
+                  onBlur={this.handleAutoFill}
+                />
+                <fieldset className="form-group">
+                  <div className="form-check">
+                    <label className="form-check-label">
+                      <input
+                        className="form-check-input"
+                        type="checkbox"
+                        value=""
+                        checked={this.state.previousUserChecked}
+                        onClick={this.handleClick}
+                      />
+                      If you're a previous user, check box to auto-fill your
+                      last route.
+                    </label>
+                  </div>
+                </fieldset>
+                <div className="card-header" />
+                <label htmlFor="search">Starting City</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  id="start-city"
+                  name="startCity"
+                  value={this.state.startCity}
+                  placeholder="Denver"
+                  onChange={this.handleChange}
+                />
+                <label htmlFor="search">Starting State</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  id="start-state"
+                  name="startState"
+                  value={this.state.startState}
+                  placeholder="CO"
+                  onChange={this.handleChange}
+                />
+                <label htmlFor="search">Starting ZipCode</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  id="start-zip"
+                  name="startZip"
+                  value={this.state.startZip}
+                  placeholder="80210"
+                  onChange={this.handleChange}
+                />
+                <div className="card-header" />
+                <StartTime />
+                <div className="card-header" />
+                <label htmlFor="search">Ending City</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  id="end-city"
+                  name="endCity"
+                  value={this.state.endCity}
+                  placeholder="Denver"
+                  onChange={this.handleChange}
+                />
+                <label htmlFor="search">Ending State</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  id="end-state"
+                  name="endState"
+                  value={this.state.endState}
+                  placeholder="CO"
+                  onChange={this.handleChange}
+                />
+                <label htmlFor="search">Ending ZipCode</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  id="end-zip"
+                  name="endZip"
+                  value={this.state.endZip}
+                  placeholder="80202"
+                  onChange={this.handleChange}
+                />
+                <div className="card-header" />
+                <EndTime />
+                <div className="card-header" />
+              </div>
+              <button
+                id="submit-button"
+                type="submit"
+                className="btn btn-success btn-lg btn-block"
+              >
+                Search
+              </button>
+            </form>
+          </ul>
+        </div>
+        <div className="card mb-3">
+          <h3 className="card-header">WEATHER</h3>
+          <ul className="list-group list-group-flush">
+            <li className="list-group-item">
+              <strong>Start of Route Weather</strong>
+            </li>
+            <section id="results-start-weather">
+              <StartWeather {...startWeather} />
+            </section>
+            <li className="list-group-item">
+              <strong>End of Route Weather</strong>
+            </li>
+            <section id="results-end-weather">
+              <EndWeather {...endWeather} />
+            </section>
+          </ul>
+        </div>
+      </div>
+    );
+  }
 }
 
 export default RouteTimesForm;
-
-// this.handleSubmit = this.handleSubmit.bind(this);
-        // this.handleSubmit()
